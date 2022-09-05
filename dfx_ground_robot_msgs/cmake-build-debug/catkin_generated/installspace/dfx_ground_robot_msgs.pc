@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: dfx_ground_robot_msgs
+Description: Description of dfx_ground_robot_msgs
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

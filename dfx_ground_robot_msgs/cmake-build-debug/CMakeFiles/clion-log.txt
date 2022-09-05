@@ -1,0 +1,55 @@
+/home/jungsu/clion-2022.2.1/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/jungsu/clion-2022.2.1/bin/ninja/linux/ninja -G Ninja -S /home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs -B /home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug
+-- Using CATKIN_DEVEL_PREFIX: /home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug/devel
+-- Using CMAKE_PREFIX_PATH: /home/jungsu/catkin_ws/devel;/opt/ros/noetic
+-- This workspace overlays: /home/jungsu/catkin_ws/devel;/opt/ros/noetic
+-- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+-- Using PYTHON_EXECUTABLE: /usr/bin/python3
+-- Using Debian Python package layout
+-- Using empy: /usr/lib/python3/dist-packages/em.py
+-- Using CATKIN_ENABLE_TESTING: ON
+-- Call enable_testing()
+-- Using CATKIN_TEST_RESULTS_DIR: /home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug/test_results
+-- Forcing gtest/gmock from source, though one was otherwise available.
+-- Found gtest sources under '/usr/src/googletest': gtests will be built
+-- Found gmock sources under '/usr/src/googletest': gmock will be built
+CMake Deprecation Warning at /usr/src/googletest/CMakeLists.txt:4 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+CMake Deprecation Warning at /usr/src/googletest/googlemock/CMakeLists.txt:45 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+CMake Deprecation Warning at /usr/src/googletest/googletest/CMakeLists.txt:56 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- Found PythonInterp: /usr/bin/python3 (found version "3.8.10") 
+-- Using Python nosetests: /usr/bin/nosetests3
+-- catkin 0.8.10
+-- BUILD_SHARED_LIBS is on
+-- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+-- dfx_ground_robot_msgs: 1 messages, 0 services
+CMake Error at /opt/ros/noetic/share/catkin/cmake/catkin_package.cmake:224 (message):
+  catkin_package() DEPENDS on the catkin package 'message_runtime' which must
+  therefore be listed as a run dependency in the package.xml
+Call Stack (most recent call first):
+  /opt/ros/noetic/share/catkin/cmake/catkin_package.cmake:102 (_catkin_package)
+  CMakeLists.txt:22 (catkin_package)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+See also "/home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug/CMakeFiles/CMakeError.log".

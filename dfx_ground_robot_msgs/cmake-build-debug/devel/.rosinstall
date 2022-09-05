@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug/devel/setup.sh

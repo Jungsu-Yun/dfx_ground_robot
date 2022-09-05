@@ -1,0 +1,2 @@
+set(dfx_ground_robot_msgs_MESSAGE_FILES "/home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/msg/SensorState.msg")
+set(dfx_ground_robot_msgs_SERVICE_FILES "")

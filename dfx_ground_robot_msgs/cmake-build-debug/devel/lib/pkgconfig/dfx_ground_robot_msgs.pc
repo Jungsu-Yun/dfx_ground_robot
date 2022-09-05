@@ -1,0 +1,8 @@
+prefix=/home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_msgs/cmake-build-debug/devel
+
+Name: dfx_ground_robot_msgs
+Description: Description of dfx_ground_robot_msgs
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

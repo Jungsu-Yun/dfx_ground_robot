@@ -1,0 +1,8 @@
+prefix=/home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_fake/cmake-build-debug/devel
+
+Name: dfx_ground_robot_fake
+Description: Description of dfx_ground_robot_fake
+Version: 0.0.0
+Cflags: -I/home/jungsu/catkin_ws/src/dfx_ground_robot/dfx_ground_robot_fake/include
+Libs: -L${prefix}/lib 
+Requires: dfx_ground_robot_msgs geometry_msgs nav_msgs roscpp sensor_msgs std_msgs tf

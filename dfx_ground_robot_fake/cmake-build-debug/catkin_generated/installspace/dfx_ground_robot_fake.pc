@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: dfx_ground_robot_fake
+Description: Description of dfx_ground_robot_fake
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: dfx_ground_robot_msgs geometry_msgs nav_msgs roscpp sensor_msgs std_msgs tf
