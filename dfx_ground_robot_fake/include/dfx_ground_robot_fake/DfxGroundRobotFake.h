@@ -44,7 +44,7 @@ private:
     ros::NodeHandle node_handle;
     ros::NodeHandle prev_node_handle;
 
-    ros::Time las_cmd_vel_time;
+    ros::Time last_cmd_vel_time;
     ros::Time prev_update_time;
 
     ros::Publisher joint_state_publisher;
@@ -81,7 +81,6 @@ private:
 
 public:
     DfxGroundRobotFake();
-    ~DfxGroundRobotFake();
 
     bool init();
     bool update();
