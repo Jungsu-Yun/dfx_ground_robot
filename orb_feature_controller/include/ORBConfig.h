@@ -5,15 +5,17 @@ class ORBConfig{
 public:
     int nFeatures;
     int normType;
-    int distanceLimit;
+    double distanceLimit;
     int goodMatchNum;
+    double error_limit;
 
-    ORBConfig(int nFeatures, int normType, int distanceLimit, int goodMatchNum)
+    ORBConfig(int nFeatures, int normType, int distanceLimit, int goodMatchNum, double error_limit)
     {
         this->nFeatures = nFeatures;
         this->normType = normType;
         this->distanceLimit = distanceLimit;
         this->goodMatchNum = goodMatchNum;
+        this->error_limit = error_limit;
     }
 };
 

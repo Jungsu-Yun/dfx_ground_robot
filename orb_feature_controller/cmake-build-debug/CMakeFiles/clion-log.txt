@@ -1,4 +1,4 @@
-/home/jungsu/clion-2022.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/jungsu/clion-2022.2/bin/ninja/linux/ninja -G Ninja -S /home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller -B /home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller/cmake-build-debug
+/home/jungsu/clion-2022.2.1/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller -B /home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller/cmake-build-debug
 -- Using CATKIN_DEVEL_PREFIX: /home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller/cmake-build-debug/devel
 -- Using CMAKE_PREFIX_PATH: /home/jungsu/catkin_ws/devel;/opt/ros/noetic
 -- This workspace overlays: /home/jungsu/catkin_ws/devel;/opt/ros/noetic

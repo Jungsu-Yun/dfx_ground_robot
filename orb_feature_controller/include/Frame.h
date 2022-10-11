@@ -19,14 +19,18 @@ private:
     std::vector<cv::DMatch> good_matches;
 
     cv::Ptr<cv::Feature2D> orb_feature;
-    cv::Ptr<cv::DescriptorMatcher> matcher;
 
-    ORBConfig config;
+    ORBConfig* config;
 
-    void compute_feature();
 public:
-    Frame(cv::Mat color_image, cv::Mat depth_image, ORBConfig config);
-    void ORBMathcing(Frame previous_frame);
+    Frame(cv::Mat color_image, cv::Mat depth_image, ORBConfig* config);
+    void compute_feature();
+
+    cv::Mat get_color_image();
+    cv::Mat get_gray_image();
+    cv::Mat get_orb_descriptor();
+    std::vector<cv::KeyPoint> get_keypoint();
+    cv::Mat get_depth_image();
 };
 
 
