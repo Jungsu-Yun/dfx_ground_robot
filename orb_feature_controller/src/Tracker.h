@@ -4,6 +4,7 @@
 #include "Frame.h"
 #include "ORBConfig.h"
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 class Tracker
 {
@@ -15,7 +16,8 @@ private:
 
     std::vector<cv::DMatch> matches;
     std::vector<cv::Point2f> ORBPoints;
-    std::vector<cv::Point2f> GoodPoints;
+    std::vector<cv::Point2f> GoodCurrentPoints;
+    std::vector<cv::Point2f> GoodPreviousPoints;
 
     cv::Mat overlayFrame;
     cv::Mat mask;
@@ -28,6 +30,8 @@ public:
     bool OpticalFlow(Frame* now_frame);
     void setInitFrame(Frame* init_frame);
     void setPreviousFrame(Frame* previous_frame);
+    double CalculateRadian(Frame *now_frame);
+    cv::Mat getOverlayFrame();
 };
 
 
