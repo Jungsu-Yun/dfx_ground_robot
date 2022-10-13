@@ -8,7 +8,6 @@ Tracker::Tracker(Frame *init_frame, Frame *previous_frame, ORBConfig *config)
 
     this->ORBMather = cv::BFMatcher::create(config->normType);
 
-    ORBMatching();
 }
 
 Tracker::Tracker(ORBConfig *config)
@@ -26,23 +25,46 @@ bool Tracker::isDistanceLimit(cv::DMatch match)
 
 bool Tracker::ORBMatching()
 {
-    this->ORBMather->match(init_frame->get_orb_descriptor(), previous_frame->get_orb_descriptor(), this->matches);
+    this->matches.clear();
+    this->matches.shrink_to_fit();
+    std::vector<cv::DMatch> matches_temp;
+    try{
+        this->ORBMather->match(init_frame->get_orb_descriptor(), previous_frame->get_orb_descriptor(), matches_temp);
 
-    if(!this->matches.empty())
-    {
-//        matches.erase(std::remove_if(this->matches.begin(), this->matches.end(), &Tracker::isDistanceLimit), this->matches.end());
+        if(!matches_temp.empty())
+        {
+            for(auto iter = matches_temp.begin() ; iter != matches_temp.end() ; iter++)
+            {
+                if(iter->distance < this->config->distanceLimit)
+                {
+                    cv::DMatch tmp;
+                    tmp.distance = iter->distance;
+                    tmp.trainIdx = iter->trainIdx;
+                    tmp.imgIdx = iter->imgIdx;
+                    tmp.queryIdx = iter->queryIdx;
+                    this->matches.push_back(tmp);
+                }
+            }
+            if(this->matches.empty())
+                return false;
 
-        std::sort(this->matches.begin(), this->matches.end());
-        if(this->matches.size() < config->goodMatchNum)
-            for(auto iter = matches.begin() ; iter != matches.end() ; iter++)
-                this->ORBPoints.push_back(previous_frame->get_keypoint().at(iter->trainIdx).pt);
-        else
-            for(auto iter = matches.begin() ; iter != matches.begin() + config->goodMatchNum ; iter++)
-                this->ORBPoints.push_back(previous_frame->get_keypoint().at(iter->trainIdx).pt);
+            std::sort(this->matches.begin(), this->matches.end());
+            if(this->matches.size() < config->goodMatchNum)
+                for(auto iter = matches.begin() ; iter != matches.end() ; iter++)
+                    this->ORBPoints.push_back(previous_frame->get_keypoint().at(iter->trainIdx).pt);
+            else
+                for(auto iter = matches.begin() ; iter != matches.begin() + config->goodMatchNum ; iter++)
+                    this->ORBPoints.push_back(previous_frame->get_keypoint().at(iter->trainIdx).pt);
 
-        return true;
+            return true;
+        }
+        return false;
     }
-    return false;
+    catch (cv::Exception e)
+    {
+        std::cout << e.what() << std::endl;
+        return false;
+    }
 }
 
 bool Tracker::OpticalFlow(Frame *now_frame)
@@ -53,13 +75,14 @@ bool Tracker::OpticalFlow(Frame *now_frame)
     std::vector<cv::Point2f> tracked_point;
     std::vector<uchar> status;
     std::vector<float> error;
-
     try
     {
         cv::calcOpticalFlowPyrLK(this->previous_frame->get_gray_image(), target_gray, this->ORBPoints, tracked_point, status, error);
-        for(int i = 0 ; i < this->ORBPoints.size() ; i++)
+        if(tracked_point.empty())
+            return false;
+        for(int i = 0 ; i < tracked_point.size() ; i++)
         {
-            if(status[i] == 1 && error[i] < config->error_limit)
+            if(status[i] == 1 && (error[i] < config->error_limit))
             {
                 this->GoodPreviousPoints.push_back(this->ORBPoints[i]);
                 this->GoodCurrentPoints.push_back(tracked_point[i]);
@@ -69,6 +92,8 @@ bool Tracker::OpticalFlow(Frame *now_frame)
                 cv::circle(this->mask, tracked_point[i], 2, cv::Scalar(255, 0, 0), -1);
             }
         }
+        if(this->GoodCurrentPoints.empty() || this->GoodPreviousPoints.empty())
+            return false;
 
         cv::Mat tmp;
         cv::addWeighted(now_frame->get_color_image(), 0.7, this->previous_frame->get_color_image(), 0.3, 0.0, tmp);
@@ -89,24 +114,23 @@ void Tracker::setInitFrame(Frame *init_frame)
 void Tracker::setPreviousFrame(Frame *previous_frame)
 {
     this->previous_frame = previous_frame;
-    ORBMatching();
 }
 
 double Tracker::CalculateRadian(Frame *now_frame)
 {
     int result = 0;
     double previous_x, current_x, previous_y, current_y = 0.0;
-    double previous_depth = this->previous_frame->get_gray_image().at<unsigned short>(this->GoodCurrentPoints.at(0).x, this->GoodCurrentPoints.at(0).y);
-    double current_depth = now_frame->get_depth_image().at<unsigned short>(this->GoodCurrentPoints.at(0).x, this->GoodCurrentPoints.at(0).y);
+    double previous_depth = this->previous_frame->get_gray_image().at<unsigned short>((int)this->GoodCurrentPoints.at(0).x, (int)this->GoodCurrentPoints.at(0).y);
+    double current_depth = now_frame->get_depth_image().at<unsigned short>((int)this->GoodCurrentPoints.at(0).x, (int)this->GoodCurrentPoints.at(0).y);
 
     for(int i = 0 ; i < this->GoodCurrentPoints.size() ; i++)
     {
-        //포인트가 오른쪽으로 이동 -> +1
-        if((this->GoodCurrentPoints.at(i).x - this->GoodPreviousPoints.at(i).x) > 0)
-            result += 1;
-        //포인트가 왼쪽으로 이동 -> -1
-        else if((this->GoodCurrentPoints.at(i).x - this->GoodPreviousPoints.at(i).x) < 0)
+        //포인트가 오른쪽으로 이동 -> -1
+        if(((int)this->GoodCurrentPoints.at(i).x - (int)this->GoodPreviousPoints.at(i).x) > 0)
             result -= 1;
+        //포인트가 왼쪽으로 이동 -> +1
+        else if(((int)this->GoodCurrentPoints.at(i).x - (int)this->GoodPreviousPoints.at(i).x) < 0)
+            result += 1;
 
         //depth 최소값 찾기
         int depth_data = now_frame->get_depth_image().at<unsigned short>(this->GoodCurrentPoints.at(i).x, this->GoodCurrentPoints.at(i).y);
@@ -127,13 +151,13 @@ double Tracker::CalculateRadian(Frame *now_frame)
     this->GoodPreviousPoints.shrink_to_fit();
 
     //각도 계산하기
-//    double radian = atan2(current_x-previous_x, current_depth-previous_depth);
-    double radian = abs(atan2(current_y - previous_y, current_x-previous_y));
+    double radian = ((M_PI / 2.0) - atan2(abs(current_depth-previous_depth), abs(current_x-previous_x)))*100;
+//    double radian = atan2(abs(current_depth-previous_depth), abs(current_x-previous_x));
+//    double radian = atan2(abs(current_y - previous_y), abs(current_x - previous_x));
+//    std::cout << "Radian : " << radian << "\tDegree : " << (radian * 180) / 3.14159265 << "\tresult : " << result / abs(result) << std::endl;
+    std::cout << "Output : " << radian * (double)(result / abs(result)) << std::endl;
 
-    std::cout << current_depth << ", " << previous_depth << ", " << current_x << ", " << previous_x << std::endl;
-    std::cout << "Radian : " << radian << "Degree : " << (radian * 180) / 3.14159265 << std::endl;
-
-    return radian * result;
+    return radian * (double)(result / abs(result));
 }
 
 cv::Mat Tracker::getOverlayFrame()
