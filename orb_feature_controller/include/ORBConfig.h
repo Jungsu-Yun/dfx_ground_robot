@@ -8,14 +8,16 @@ public:
     double distanceLimit;
     int goodMatchNum;
     double error_limit;
+    int nGoodFollowed;
 
-    ORBConfig(int nFeatures, int normType, int distanceLimit, int goodMatchNum, double error_limit)
+    ORBConfig(int nFeatures, int normType, int distanceLimit, int goodMatchNum, double error_limit, int nGoodFollowed)
     {
         this->nFeatures = nFeatures;
         this->normType = normType;
         this->distanceLimit = distanceLimit;
         this->goodMatchNum = goodMatchNum;
         this->error_limit = error_limit;
+        this->nGoodFollowed = nGoodFollowed;
     }
 };
 

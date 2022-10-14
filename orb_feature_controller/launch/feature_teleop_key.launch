@@ -1,0 +1,26 @@
+<launch>
+    <node pkg="orb_feature_controller" type="orb_feature_controller_node" name="orb_feature_controller_node" output="screen">
+        <!--Camera config-->
+        <remap from="/camera/color/image_raw" to="/camera/color/image_raw"/>
+        <remap from="/camera/color/image_raw" to="/camera/color/image_raw"/>
+        <remap from="/camera/aligned_depth_to_color/image_raw" to="/camera/aligned_depth_to_color/image_raw" />
+
+        <!--Cmd Velocity config-->
+        <remap from="/turtle1/cmd_vel" to="/turtle1/cmd_vel" />
+
+        <param name="/max_linear_velocity" type="double" value="0.22"/>
+        <param name="/max_angular_velocity" type="double" value="2.84"/>
+        <param name="/linear_step_size" type="double" value="0.01"/>
+        <param name="/angular_step_size" type="double" value="0.1"/>
+
+        <!--debug output config-->
+        <remap from="/overlay_image" to="/overlay_image" />
+
+        <!--Feature controller config-->
+        <param name="/RoI" type="double" value="0.5"/>
+        <param name="/nFeatures" type="int" value="1000"/>
+        <param name="/distance_limit" type="int" value="50"/>
+        <param name="/error_limit" type="double" value="15.0"/>
+        <param name="/good_followed_num" type="int" value="10.0"/>
+    </node>
+</launch>

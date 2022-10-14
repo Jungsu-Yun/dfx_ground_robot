@@ -33,7 +33,33 @@ geometry_msgs::Twist twist;
 static struct termios initial_settings, new_settings;
 static int peek_character = -1;
 
-int key;
+double max_linear_velocity = 0.26;
+double max_angular_velocity = 1.82;
+double linear_velocity_step_size = 0.01;
+double angular_velocity_step_size = 0.1;
+
+double current_angular_velocity = 0.0;
+double straight_angular_velocity = 0.0;
+
+bool isStraight = false;
+
+double roi = 0.5;
+
+double check_max_linear_speed(double linear)
+{
+    if(linear <= max_linear_velocity)
+        return linear;
+    else
+        return max_linear_velocity;
+}
+
+double check_max_angular_speed(double angular)
+{
+    if(angular <= max_angular_velocity)
+        return angular;
+    else
+        return max_angular_velocity;
+}
 
 void init_keyboard()
 {
@@ -96,7 +122,7 @@ int get_Key()
         }
         else
         {
-            return key;
+            return 0;
         }
     }
 }
@@ -107,24 +133,23 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
         cv_bridge::CvImageConstPtr DepthPtr;
         RGBPtr = cv_bridge::toCvCopy(RGB);
         DepthPtr = cv_bridge::toCvCopy(Depth);
-
+        cv::Rect rect((RGB->width / 2) - ((RGB->width / 2 )* roi), (RGB->width / 2) - ((RGB->height / 2)*roi), RGB->width * roi, RGB->height*roi);
         if (!isInit) {
-            ROS_INFO("INIT!");
-            initFrame = new Frame(RGBPtr->image, DepthPtr->image, config);
-        tracker->setInitFrame(initFrame);
+            ROS_INFO("Init!");
+            initFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
+            tracker->setInitFrame(initFrame);
             isInit = true;
         } else if (!isFirst) {
             ROS_INFO("First!");
-            firstFrame = new Frame(RGBPtr->image, DepthPtr->image, config);
+            firstFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             tracker->setPreviousFrame(firstFrame);
             if(tracker->ORBMatching())
-            {
                 isFirst = true;
-                return;
-            }
+            else
+                isInit = false;
         } else {
-//            ROS_INFO("Tracking!!");
-            Frame currentFrame(RGBPtr->image, DepthPtr->image, config);
+            ROS_INFO("Tracking!!");
+            Frame currentFrame(RGBPtr->image(rect), DepthPtr->image(rect), config);
 
             if(!tracker->OpticalFlow(&currentFrame))
             {
@@ -134,8 +159,12 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
             else
             {
                 double radian = tracker->CalculateRadian(&currentFrame);
-                ROS_INFO("radian: %f", radian);
-                twist.angular.z = radian;
+//                ROS_INFO("radian: %f", radian);
+                if(isStraight)
+                {
+                    radian = check_max_angular_speed(radian);
+                    twist.angular.z = radian;
+                }
 
                 cv_bridge::CvImage output;
                 output.encoding = sensor_msgs::image_encodings::RGB8;
@@ -153,48 +182,86 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
 int main(int argc, char** argv)
 {
     init_keyboard();
-
+    int nFeatures = 1000;
+    int distanceLimit = 50;
+    int goodMatchNum = 100;
+    double error_limit = 15.0;
+    int nGoodFollowed = 10;
     ros::init(argc, argv, "orb_feature_tracking_node");
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
 
+    std::string name_of_node = ros::this_node::getName();
+    nh.param(name_of_node+"/max_linear_velocity", max_linear_velocity, 0.22);
+    nh.param(name_of_node+"/max_angular_velocity", max_angular_velocity, 2.84);
+    nh.param(name_of_node+"/linear_step_size", linear_velocity_step_size, 0.01);
+    nh.param(name_of_node+"/angular_step_size", angular_velocity_step_size, 0.1);
+    nh.param(name_of_node+"/nFeatures", nFeatures, 1000);
+    nh.param(name_of_node+"/distance_limit", distanceLimit, 50);
+    nh.param(name_of_node+"good_match_num", goodMatchNum, 100);
+    nh.param(name_of_node+"good_followed_num", nGoodFollowed, 10);
+    nh.param(name_of_node+"/error_limit", error_limit, 5.0);
+    nh.param(name_of_node+"/RoI", roi, 0.5);
+
     message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/camera/color/image_raw", 1);
     message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/camera/aligned_depth_to_color/image_raw", 1);
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
-    message_filters::Synchronizer<sync_pol> sync(sync_pol(1), rgb_sub,depth_sub);
+    message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageCallback,_1,_2));
 
-    cmd_pub = nh.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 10);
-    image_pub = it.advertise("overlay_image", 1);
+    cmd_pub = nh.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 1);
+    image_pub = it.advertise("/overlay_image", 1);
 
-    config = new ORBConfig(3000, cv::NORM_HAMMING, 50, 100, 15.0);
+    config = new ORBConfig(nFeatures, cv::NORM_HAMMING, distanceLimit, goodMatchNum, error_limit, nGoodFollowed);
     tracker = new Tracker(config);
 
     while(ros::ok())
     {
         ros::spinOnce();
-        key = get_Key();
+        int key = get_Key();
         if(key == 'w')
         {
-            twist.linear.x = 0.1;
+            double linear_speed = twist.linear.x + linear_velocity_step_size;
+            linear_speed = check_max_linear_speed(linear_speed);
+            twist.linear.x = linear_speed;
+
+            if(isInit && isFirst)
+                isStraight = true;
+            else
+                twist.angular.z = 0.0;
         }
         else if(key == 's')
         {
             twist.linear.x = 0.0;
             twist.angular.z = 0.0;
+            current_angular_velocity = 0.0;
+            isStraight = false;
         }
         else if(key == 'x')
         {
-            ros::spinOnce();
-            twist.linear.x = -0.1;
+            double linear_speed = twist.linear.x - linear_velocity_step_size;
+            linear_speed = check_max_linear_speed(linear_speed);
+            twist.linear.x = linear_speed;
+            if(isInit && isFirst)
+                isStraight = true;
+            else
+                twist.angular.z = 0.0;
         }
         else if(key == 'a')
         {
+            current_angular_velocity += angular_velocity_step_size;
+            current_angular_velocity = check_max_angular_speed(current_angular_velocity);
 
+            twist.angular.z = current_angular_velocity;
+            isStraight = false;
         }
         else if(key == 'd')
         {
+            current_angular_velocity -= angular_velocity_step_size;
+            current_angular_velocity = check_max_angular_speed(current_angular_velocity);
 
+            twist.angular.z = current_angular_velocity;
+            isStraight = false;
         }
         else if(key == 'q')
             break;
