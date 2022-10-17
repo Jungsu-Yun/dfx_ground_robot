@@ -6,7 +6,7 @@
         <remap from="/camera/aligned_depth_to_color/image_raw" to="/camera/aligned_depth_to_color/image_raw" />
 
         <!--Cmd Velocity config-->
-        <remap from="/turtle1/cmd_vel" to="/turtle1/cmd_vel" />
+        <remap from="/turtle1/cmd_vel" to="/cmd_vel" />
 
         <param name="/max_linear_velocity" type="double" value="0.22"/>
         <param name="/max_angular_velocity" type="double" value="2.84"/>
@@ -21,6 +21,6 @@
         <param name="/nFeatures" type="int" value="1000"/>
         <param name="/distance_limit" type="int" value="50"/>
         <param name="/error_limit" type="double" value="15.0"/>
-        <param name="/good_followed_num" type="int" value="10.0"/>
+        <param name="/good_followed_num" type="int" value="10"/>
     </node>
 </launch>

@@ -209,7 +209,7 @@ int main(int argc, char** argv)
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageCallback,_1,_2));
 
-    cmd_pub = nh.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 1);
+    cmd_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
     image_pub = it.advertise("/overlay_image", 1);
 
     config = new ORBConfig(nFeatures, cv::NORM_HAMMING, distanceLimit, goodMatchNum, error_limit, nGoodFollowed);
