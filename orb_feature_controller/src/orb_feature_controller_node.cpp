@@ -135,12 +135,10 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
         DepthPtr = cv_bridge::toCvCopy(Depth);
         cv::Rect rect((RGB->width / 2) - ((RGB->width / 2 )* roi), (RGB->width / 2) - ((RGB->height / 2)*roi), RGB->width * roi, RGB->height*roi);
         if (!isInit) {
-            ROS_INFO("Init!");
             initFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             tracker->setInitFrame(initFrame);
             isInit = true;
         } else if (!isFirst) {
-            ROS_INFO("First!");
             firstFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             tracker->setPreviousFrame(firstFrame);
             if(tracker->ORBMatching())
@@ -148,7 +146,6 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
             else
                 isInit = false;
         } else {
-            ROS_INFO("Tracking!!");
             Frame currentFrame(RGBPtr->image(rect), DepthPtr->image(rect), config);
 
             if(!tracker->OpticalFlow(&currentFrame))
@@ -159,7 +156,7 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
             else
             {
                 double radian = tracker->CalculateRadian(&currentFrame);
-//                ROS_INFO("radian: %f", radian);
+                ROS_INFO("radian: %f", radian);
                 if(isStraight)
                 {
                     radian = check_max_angular_speed(radian);
