@@ -47,18 +47,18 @@ double roi = 0.5;
 
 double check_max_linear_speed(double linear)
 {
-    if(linear <= max_linear_velocity)
+    if(abs(linear) <= max_linear_velocity)
         return linear;
     else
-        return max_linear_velocity;
+        return max_linear_velocity * (linear / abs(linear));
 }
 
 double check_max_angular_speed(double angular)
 {
-    if(angular <= max_angular_velocity)
+    if(abs(angular) <= max_angular_velocity)
         return angular;
     else
-        return max_angular_velocity;
+        return max_angular_velocity * (angular / abs(angular));
 }
 
 void init_keyboard()
@@ -138,6 +138,7 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
             initFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             tracker->setInitFrame(initFrame);
             isInit = true;
+            twist.angular.z = 0.0;
         } else if (!isFirst) {
             firstFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             tracker->setPreviousFrame(firstFrame);
@@ -145,6 +146,7 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
                 isFirst = true;
             else
                 isInit = false;
+            twist.angular.z = 0.0;
         } else {
             Frame currentFrame(RGBPtr->image(rect), DepthPtr->image(rect), config);
 
@@ -152,17 +154,17 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
             {
                 isInit = false;
                 isFirst = false;
+                twist.angular.z = 0.0;
             }
             else
             {
                 double radian = tracker->CalculateRadian(&currentFrame);
-                ROS_INFO("radian: %f", radian);
                 if(isStraight)
                 {
                     radian = check_max_angular_speed(radian);
                     twist.angular.z = radian;
                 }
-
+                ROS_INFO("radian: %f \t max speed: %f", radian, twist.angular.z);
                 cv_bridge::CvImage output;
                 output.encoding = sensor_msgs::image_encodings::RGB8;
                 output.image = tracker->getOverlayFrame();
@@ -187,7 +189,6 @@ int main(int argc, char** argv)
     std::string cmd_topic = "/cmd_vel";
     std::string rgb_topic = "/camera/color/image_raw";
     std::string depth_topic = "/camera/aligned_depth_to_color/image_raw";
-
     ros::init(argc, argv, "orb_feature_tracking_node");
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
