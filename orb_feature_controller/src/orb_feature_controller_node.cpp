@@ -113,7 +113,7 @@ int _getch()
 int get_Key()
 {
     auto start = std::chrono::system_clock::now();
-    while(std::chrono::duration<double>(std::chrono::system_clock::now() - start).count() < 1.0)
+    while(std::chrono::duration<double>(std::chrono::system_clock::now() - start).count() < 0.1)
     {
         if(_kbhit())
         {
@@ -187,6 +187,10 @@ int main(int argc, char** argv)
     int goodMatchNum = 100;
     double error_limit = 15.0;
     int nGoodFollowed = 10;
+    std::string cmd_topic = "/cmd_vel";
+    std::string rgb_topic = "/camera/color/image_raw";
+    std::string depth_topic = "/camera/aligned_depth_to_color/image_raw";
+
     ros::init(argc, argv, "orb_feature_tracking_node");
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
