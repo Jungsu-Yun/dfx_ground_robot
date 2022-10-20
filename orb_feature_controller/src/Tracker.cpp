@@ -121,8 +121,8 @@ double Tracker::CalculateRadian(Frame *now_frame)
 {
     int result = 0;
     double previous_x, current_x, previous_y, current_y = 0.0;
-    double previous_depth = this->previous_frame->get_gray_image().at<unsigned short>((int)this->GoodCurrentPoints.at(0).x, (int)this->GoodCurrentPoints.at(0).y) * 0.001;
-    double current_depth = now_frame->get_depth_image().at<unsigned short>((int)this->GoodCurrentPoints.at(0).x, (int)this->GoodCurrentPoints.at(0).y) * 0.001;
+    double previous_depth = this->previous_frame->get_gray_image().at<unsigned short>((int)this->GoodCurrentPoints.at(0).x, (int)this->GoodCurrentPoints.at(0).y);
+    double current_depth = now_frame->get_depth_image().at<unsigned short>((int)this->GoodCurrentPoints.at(0).x, (int)this->GoodCurrentPoints.at(0).y);
 
     for(int i = 0 ; i < this->GoodCurrentPoints.size() ; i++)
     {
@@ -134,15 +134,18 @@ double Tracker::CalculateRadian(Frame *now_frame)
             result += 1;
 
         //depth 최소값 찾기
-        int depth_data = now_frame->get_depth_image().at<unsigned short>(this->GoodCurrentPoints.at(i).x, this->GoodCurrentPoints.at(i).y) * 0.001;
+//        int depth_data = now_frame->get_depth_image().at<unsigned short>(this->GoodCurrentPoints.at(i).x, this->GoodCurrentPoints.at(i).y) * 0.001;
+        int depth_data = now_frame->get_depth_image().at<unsigned short>(this->GoodCurrentPoints.at(i).x, this->GoodCurrentPoints.at(i).y);
         if((depth_data < current_depth) && depth_data != 0)
         {
             previous_x = this->GoodPreviousPoints[i].x;
             current_x = this->GoodCurrentPoints[i].x;
             previous_y = this->GoodPreviousPoints[i].y;
             current_y = this->GoodCurrentPoints[i].y;
-            previous_depth = this->previous_frame->get_gray_image().at<unsigned short>((int)this->GoodPreviousPoints.at(i).x, (int)this->GoodPreviousPoints.at(i).y) * 0.001;
-            current_depth = now_frame->get_depth_image().at<unsigned short>((int)this->GoodCurrentPoints.at(i).x, (int)this->GoodCurrentPoints.at(i).y) * 0.001;
+//            previous_depth = this->previous_frame->get_gray_image().at<unsigned short>((int)this->GoodPreviousPoints.at(i).x, (int)this->GoodPreviousPoints.at(i).y) * 0.001;
+//            current_depth = now_frame->get_depth_image().at<unsigned short>((int)this->GoodCurrentPoints.at(i).x, (int)this->GoodCurrentPoints.at(i).y) * 0.001;
+            previous_depth = this->previous_frame->get_gray_image().at<unsigned short>((int)this->GoodPreviousPoints.at(i).x, (int)this->GoodPreviousPoints.at(i).y);
+            current_depth = now_frame->get_depth_image().at<unsigned short>((int)this->GoodCurrentPoints.at(i).x, (int)this->GoodCurrentPoints.at(i).y);
         }
     }
 
@@ -153,7 +156,7 @@ double Tracker::CalculateRadian(Frame *now_frame)
 
     //각도 계산하기
     double radian = ((M_PI / 2.0) - atan2(abs(current_depth-previous_depth), abs(current_x-previous_x)));
-//    std::cout << previous_depth << "\t" << current_depth << "\t" << radian << std::endl;
+    std::cout << previous_depth << "\t" << current_depth << "\t" << current_x << "\t" << previous_x << "\t" << radian << std::endl;
 //    double radian = atan2(abs(current_depth-previous_depth), abs(current_x-previous_x));
 //    double radian = atan2(abs(current_y - previous_y), abs(current_x - previous_x));
 //    std::cout << "Radian : " << radian << "\tDegree : " << (radian * 180) / 3.14159265 << "\tresult : " << result / abs(result) << std::endl;

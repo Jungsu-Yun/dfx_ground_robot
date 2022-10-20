@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"orb_feature_controller\"
 
-CXX_INCLUDES = -I/home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller/include -I/home/jungsu/catkin_ws/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -isystem /usr/local/include/opencv
+CXX_INCLUDES = -I/home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller/include -I/home/jungsu/catkin_ws/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -I/usr/include/eigen3 -I/usr/include/pcl-1.10 -I/usr/include/vtk-7.1 -I/usr/include/freetype2 -isystem /usr/local/include/opencv
 
 CXX_FLAGS = -g
 

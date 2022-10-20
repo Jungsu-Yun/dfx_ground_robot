@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  image_geometry
+  pcl_ros
 )
 find_package(OpenCV REQUIRED)
 
@@ -142,7 +144,8 @@ add_executable(${PROJECT_NAME}_node src/orb_feature_controller_node.cpp
                                     src/Frame.cpp
                                     include/ORBConfig.h
                                     src/Tracker.cpp
-)
+                                    include/depth_traits.h
+        include/depth_conversion.h)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

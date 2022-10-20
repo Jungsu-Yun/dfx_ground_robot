@@ -40,6 +40,7 @@ CMake Deprecation Warning at /usr/src/googletest/googletest/CMakeLists.txt:56 (c
 -- Using Python nosetests: /usr/bin/nosetests3
 -- catkin 0.8.10
 -- BUILD_SHARED_LIBS is on
+-- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/jungsu/catkin_ws/src/dfx_ground_robot/orb_feature_controller/cmake-build-debug
