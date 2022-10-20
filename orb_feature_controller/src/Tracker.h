@@ -31,7 +31,10 @@ public:
     void setInitFrame(Frame* init_frame);
     void setPreviousFrame(Frame* previous_frame);
     double CalculateRadian(Frame *now_frame);
+    bool OpticalFlow(Frame* now_frame, double radi);
     cv::Mat getOverlayFrame();
+
+    double radian;
 };
 
 

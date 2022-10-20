@@ -58,6 +58,10 @@ bool isStraight = false;
 
 double roi = 0.5;
 
+bool isRadius = false;
+int meanK = 50;
+double stddevMulThresh = 1.0;
+
 double check_max_linear_speed(double linear)
 {
     if(abs(linear) <= max_linear_velocity)
@@ -69,11 +73,20 @@ double check_max_linear_speed(double linear)
 
 double check_max_angular_speed(double angular)
 {
-    if(abs(angular) <= max_angular_velocity)
-        return angular;
+    if(angular > 0)
+    {
+        if(angular <= max_angular_velocity)
+            return angular;
+        else
+            return max_angular_velocity;
+    }
     else
-        return max_angular_velocity * (angular / abs(angular));
-//        return max_angular_velocity;
+    {
+        if(angular >= max_angular_velocity * -0.1)
+            return angular;
+        else
+            return max_angular_velocity * -0.1;
+    }
 }
 
 void init_keyboard()
@@ -175,7 +188,8 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
 
         pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
         sor.setInputCloud(temp_cloud);
-        sor.setMeanK(10);
+        sor.setMeanK(meanK);
+        sor.setStddevMulThresh (stddevMulThresh);
         sor.filter(*filtered_cloud);
 
         sensor_msgs::PointCloud2 tmp_pcl_msg;
@@ -221,6 +235,7 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
 
         cv::Rect rect((RGB->width / 2) - ((RGB->width / 2 )* roi), (RGB->height / 2) - ((RGB->height / 2)*roi), RGB->width * roi, RGB->height*roi);
         if (!isInit) {
+            ROS_INFO("INIT!");
             initFrame = new Frame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             initFrame = new Frame(RGBPtr->image(rect), depth_filtered(rect), config);
             tracker->setInitFrame(initFrame);
@@ -239,25 +254,46 @@ void ImageCallback(const sensor_msgs::Image::ConstPtr &RGB, const sensor_msgs::I
 //            Frame currentFrame(RGBPtr->image(rect), DepthPtr->image(rect), config);
             Frame currentFrame(RGBPtr->image(rect), depth_filtered(rect), config);
 
-            if(!tracker->OpticalFlow(&currentFrame))
+//            if(!tracker->OpticalFlow(&currentFrame))
+//            {
+//                isInit = false;
+//                isFirst = false;
+//                twist.angular.z = 0.0;
+//            }
+//            else
+//            {
+//                double radian = tracker->CalculateRadian(&currentFrame);
+//                if(isStraight)
+//                {
+//                    radian = check_max_angular_speed(radian);
+//                    twist.angular.z = radian;
+//                }
+//                std::cout << "Raidan : " << (float)radian << "\t" << twist.angular.z << std::endl;
+//                cv_bridge::CvImage output;
+//                output.encoding = sensor_msgs::image_encodings::RGB8;
+//                output.image = tracker->getOverlayFrame();
+//                image_pub.publish(output.toImageMsg());
+//            }
+            double radian;
+            if (tracker->OpticalFlow(&currentFrame, radian))
             {
-                isInit = false;
-                isFirst = false;
-                twist.angular.z = 0.0;
-            }
-            else
-            {
-                double radian = tracker->CalculateRadian(&currentFrame);
                 if(isStraight)
                 {
+                    radian = tracker->radian;
                     radian = check_max_angular_speed(radian);
                     twist.angular.z = radian;
                 }
-                std::cout << "Raidan : " << (float)radian << "\t" << twist.angular.z << std::endl;
+                std::cout << "Current x: " << twist.linear.x << "\t" << "Current z: " << "\t" << twist.angular.z << std::endl;
                 cv_bridge::CvImage output;
                 output.encoding = sensor_msgs::image_encodings::RGB8;
                 output.image = tracker->getOverlayFrame();
                 image_pub.publish(output.toImageMsg());
+            }
+            else
+            {
+                isInit = false;
+                isFirst = false;
+                twist.angular.z = 0.0;
             }
         }
     }
@@ -293,6 +329,9 @@ int main(int argc, char** argv)
     nh.param(name_of_node+"good_followed_num", nGoodFollowed, 10);
     nh.param(name_of_node+"/error_limit", error_limit, 5.0);
     nh.param(name_of_node+"/RoI", roi, 0.5);
+    nh.param(name_of_node+"/isRaidus", isRadius, false);
+    nh.param(name_of_node+"/MeanK", meanK, 50);
+    nh.param(name_of_node+"/StddevMulThresh", stddevMulThresh,1.0);
 
     message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/camera/color/image_raw", 1);
     message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/camera/aligned_depth_to_color/image_raw", 1);
