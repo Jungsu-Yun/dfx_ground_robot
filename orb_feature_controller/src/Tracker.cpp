@@ -207,10 +207,6 @@ bool Tracker::OpticalFlow(Frame* now_frame, double radi)
 
                     previous_x = this->ORBPoints[i].x;
                     previous_depth = previous_frame->get_depth_image().at<float>((int)this->ORBPoints[i].x, (int)this->ORBPoints[i].y) * 0.001;
-
-                    cv::line(this->mask, this->ORBPoints[i], tracked_point[i], cv::Scalar(255,255,255), 1);
-                    cv::circle(this->mask, this->ORBPoints[i], 2, cv::Scalar(255, 0, 0), -1);
-                    cv::circle(this->mask, tracked_point[i], 2, cv::Scalar(255, 0, 0), -1);
                 }
                 else if (now_frame->get_depth_image().at<unsigned short>((int)tracked_point[i].x, (int)tracked_point[i].y) < current_depth && now_frame->get_depth_image().at<float>((int)tracked_point[i].x, (int)tracked_point[i].y) != 0 && previous_frame->get_depth_image().at<float>((int)this->ORBPoints[i].x, (int)this->ORBPoints[i].y))
                 {
@@ -218,12 +214,10 @@ bool Tracker::OpticalFlow(Frame* now_frame, double radi)
                     current_depth = now_frame->get_depth_image().at<unsigned short>((int)tracked_point[i].x, (int)tracked_point[i].y) * 0.001;
                     previous_x = this->ORBPoints[i].x;
                     previous_depth = previous_frame->get_depth_image().at<unsigned short>((int)this->ORBPoints[i].x, (int)this->ORBPoints[i].y) * 0.001;
-
-                    cv::line(this->mask, this->ORBPoints[i], tracked_point[i], cv::Scalar(255,255,255), 1);
-                    cv::circle(this->mask, this->ORBPoints[i], 2, cv::Scalar(255, 0, 0), -1);
-                    cv::circle(this->mask, tracked_point[i], 2, cv::Scalar(255, 0, 0), -1);
                 }
-
+                cv::line(this->mask, this->ORBPoints[i], tracked_point[i], cv::Scalar(255,255,255), 1);
+                cv::circle(this->mask, this->ORBPoints[i], 2, cv::Scalar(255, 0, 0), -1);
+                cv::circle(this->mask, tracked_point[i], 2, cv::Scalar(255, 0, 0), -1);
                 cnt++;
             }
         }
